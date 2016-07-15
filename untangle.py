@@ -5,6 +5,7 @@ import logging
 from CCInterpreter import CCInterpreter
 from Parser import AST
 from PrettyPrinter import PrettyPrinter
+from Simplifier import Simplifier
 
 log = logging.getLogger("Untangle")
 #fh = logging.FileHandler('test.log')
@@ -61,9 +62,16 @@ def main(argv):
     parser = AST(scriptText)
     print "done AST"
 
+    statements = parser.statements
+
     printer = PrettyPrinter()
-    print "printer made"
-    print printer.toString(parser.statements)
+    print "Before simplifying"
+    print printer.toString(statements)
+
+    sfier = Simplifier()
+    simpler = sfier.handle(statements)
+    print "After simplifying"
+    print printer.toString(simpler)
 
     #scriptAst = parser.handle(scriptText)
 

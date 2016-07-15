@@ -193,7 +193,7 @@ class PrettyPrinter(object):
         self.indention+=1
         ret += self.toString(node.body) + "\n"
         self.indention-=1
-        ret += "}"
+        ret += self.indent("}")
         return ret
 
     def printAstDoWhileStatement(self, node):

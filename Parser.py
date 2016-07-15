@@ -40,8 +40,15 @@ class AST(object):
 
     # Called from PyV8's visit in walk()
     def onProgram(self, prog):
+        print "onProgram: %s" % type(prog)
         self.json = prog.toJSON()
         #log.debug(self.json)
+
+        #TODO: program is actually FunctionLiteral
+        #ret = self.handle(prog)
+        #self.statements.append(ret)
+        #var_dump(ret)
+        #return ret
 
         decls = iter(prog.scope.declarations)
         instructions = iter(prog.body)
@@ -63,7 +70,7 @@ class AST(object):
             inst = next_inst
             next_inst = next(instructions, None)
 
-        #var_dump(self.statements)
+        var_dump(self.statements)
         #serialized = jsonpickle.encode(self.statements)
         #print json.dumps(json.loads(serialized), indent=4)
 
@@ -256,6 +263,8 @@ class AST(object):
             ret += '"'
             val = ret
 
+        #TODO: check to see if we can get asPropertyName
+        #print "AstLiteral: %s" % litr.asPropertyName
         return AstLiteral(val, litr.isNull, litr.isTrue, litr.isFalse)
 
     def handleAstReturnStatement(self, stmt):
@@ -422,7 +431,7 @@ class AstBlock(AstNode):
         self.statements = statements
 
 class AstLiteral(AstExpression):
-    def __init__(self, value, isNull, isTrue, isFalse):
+    def __init__(self, value, isNull = False, isTrue = False, isFalse = False):
         self.value = value
         self.isNull = isNull
         self.isTrue = isTrue
