@@ -40,7 +40,7 @@ class AST(object):
 
     # Called from PyV8's visit in walk()
     def onProgram(self, prog):
-        print "onProgram: %s" % type(prog)
+        #print "onProgram: %s" % type(prog)
         self.json = prog.toJSON()
         #log.debug(self.json)
 
@@ -70,9 +70,9 @@ class AST(object):
             inst = next_inst
             next_inst = next(instructions, None)
 
-        var_dump(self.statements)
-        #serialized = jsonpickle.encode(self.statements)
-        #print json.dumps(json.loads(serialized), indent=4)
+        #var_dump(self.statements)
+        serialized = jsonpickle.encode(self.statements)
+        print json.dumps(json.loads(serialized), indent=4)
 
     def handle(self, statement):
         try:
@@ -523,7 +523,7 @@ class AstScope(AstNode):
         self.parameters = parameters
         self.declarations = declarations
 
-class AstOp(object):
+class AstOp(AstNode):
     def __init__(self, op):
         self.op = op
 
@@ -575,7 +575,7 @@ AstOp.IN = AstOp("in")
 
 AstOp.ILLEGAL = AstOp("ILLEGAL")
 
-class AstVarMode(object):
+class AstVarMode(AstNode):
     def __init__(self, mode):
         self.mode = mode
 
