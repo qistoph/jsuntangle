@@ -40,6 +40,10 @@ class PrettyPrinter(object):
         ret = "(%s)" % ", ".join(map(self.toString, args))
         return ret
 
+    def printAstComment(self, node):
+        ret = "// %s" % node.text
+        return ret
+
     def printAstLiteral(self, node, quote = False):
         ret = ""
         if type(node) is not AstLiteral:

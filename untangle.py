@@ -9,9 +9,8 @@ from Simplifier import Simplifier
 
 log = logging.getLogger("Untangle")
 #fh = logging.FileHandler('test.log')
-#TODO output log to terminal
 #log.addHandler(fh)
-log.addHandler(logging.StreamHandler(sys.stdout))
+#log.addHandler(logging.StreamHandler(sys.stdout))
 log.setLevel(logging.DEBUG)
 
 def usage():

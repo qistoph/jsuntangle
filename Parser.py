@@ -364,6 +364,10 @@ class AstTODO(AstNode):
     def __init__(self, text):
         self.text = text
 
+class AstComment(AstNode):
+    def __init__(self, text):
+        self.text = text
+
 class AstExpression(AstNode):
     def __init__(self, expr):
         self.expression = expr
