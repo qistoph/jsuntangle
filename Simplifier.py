@@ -260,9 +260,9 @@ class Simplifier(object):
         subScriptSimple = self.handle(subScriptAst.statements)
 
         statements = []
-        statements.append(AstComment("Pre eval(%s)" % eval_arg))
+        statements.append(AstComment("Pre eval(%s)" % self.displayValue(eval_arg)))
         statements.append(subScriptAst.statements)
-        statements.append(AstComment("Post eval(%s)" % eval_arg))
+        statements.append(AstComment("Post eval(%s)" % self.displayValue(eval_arg)))
         block = AstBlock(statements)
 
         return block
@@ -281,7 +281,7 @@ class Simplifier(object):
 
     def displayValue(self, val):
         if type(val) is not str:
-            val = val.__str__()
+            val = pp.toString(val)
         if len(val) > 40:
             val = val[0:37] + '...'
         return val
