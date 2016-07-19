@@ -253,7 +253,7 @@ class AST(object):
         elif litr.isString:
             if val[0] != '"' or val[-1] != '"':
                 raise Exception('Literal string expected to start and end with "')
-            ret = '"'
+            ret = ''
             for c in val[1:-1]:
                 if c == "\n":
                     ret += "\\n"
@@ -269,12 +269,11 @@ class AST(object):
                     ret += "\\x%02x" % ord(c)
                 else:
                     ret += c
-            ret += '"'
             val = ret
 
         #TODO: check to see if we can get asPropertyName
         #print "AstLiteral: %s" % litr.asPropertyName
-        return AstLiteral(val, litr.isNull, litr.isTrue, litr.isFalse, litr.isString, litr.isNumber)
+        return AstLiteral(val)
 
     def handleAstReturnStatement(self, stmt):
         expr = self.handle(stmt.expression)
@@ -445,13 +444,13 @@ class AstBlock(AstNode):
 
 class AstLiteral(AstExpression):
         #return AstLiteral(val, litr.isNull, litr.isTrue, litr.isFalse, litr.isString, litr.isNumber)
-    def __init__(self, value, isNull = False, isTrue = False, isFalse = False, isString = False, isNumber = False):
+    def __init__(self, value):
         self.value = value
-        self.isNull = isNull
-        self.isTrue = isTrue
-        self.isFalse = isFalse
-        self.isString = isString
-        self.isNumber = isNumber
+        self.isNull = value is None
+        self.isTrue = value is True
+        self.isFalse = value is False
+        self.isString = type(value) is str
+        self.isNumber = type(value) in [int, float]
 
 class AstAssignment(AstNode):
     def __init__(self, op, binop, target, value):

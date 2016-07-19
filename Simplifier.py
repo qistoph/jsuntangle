@@ -49,17 +49,12 @@ class Simplifier(object):
             return ast
 
     def binopAddLiterals(self, left, right):
-        if type(left.value) is str:
-            if type(right.value) is str:
-                return AstLiteral('"%s%s"' % (left.value[1:-1], right.value[1:-1]))
-            else:
-                #TODO: shouldn't happen?
-                return AstLiteral('"%s%s"' % (left.value[1:-1], right.value))
-        elif type(right.value) is str:
-            #TODO: shouldn't happen?
-            return AstLiteral('"%s%s"' % (left.value, right.value[1:-1]))
-        else:
+        if left.isString or right.isString:
+            return AstLiteral('%s%s' % (pp.printAstLiteral(left, False), pp.printAstLiteral(right, False)))
+        elif left.isNumber and right.isNumber:
             return AstLiteral(left.value + right.value)
+        else:
+            raise Exception("binopAddLiterals can't add %s and %s" % (type(left), type(right)))
 
     def handleAstBinaryOperation(self, instr):
         print "handleAstBinaryOperation(%s, %s)" % (type(instr.left), type(instr.right))
@@ -105,7 +100,7 @@ class Simplifier(object):
         # args[1] == language_mode
         # args[2] == value (optional)
 
-        name = name.value[1:-1]
+        name = name.value
         self.globalSet(name, value)
 
     def handleAstCallRuntime(self, expr):
@@ -136,10 +131,10 @@ class Simplifier(object):
         # "asdfasdf".length() // replace by 8
         if type(obj) is AstLiteral \
             and type(key) is AstLiteral \
-            and key.value.lower() == '"length"' \
+            and key.value.lower() == 'length' \
             and type(obj.value) is str:
 
-            slen = len(obj.value) - 2
+            slen = len(obj.value)
             print "Replacing %s[%s] by %d" % (pp.toString(obj), pp.toString(key), slen)
             ret = AstLiteral(slen)
             return ret
@@ -184,7 +179,7 @@ class Simplifier(object):
             key = self.handle(expr.key)
             if type(obj) is AstArrayLiteral \
                 and type(key) is AstLiteral \
-                and key.value == '"join"':
+                and key.value == 'join':
                     # ["a","b","c"].join("-")
                     ret = self.handleArrayJoin(obj.values, *args)
                     return ret
@@ -256,7 +251,7 @@ class Simplifier(object):
         return AstFunctionLiteral(name, scope, body)
 
     def handleWindowEval(self, eval_arg):
-        subScript = eval_arg.value[1:-1] # Remove quotes from literal TODO: fix in AstLiteral
+        subScript = eval_arg.value
         subScript = re.sub(r'\\"', '"', subScript)
         #TODO: unescape?
 
@@ -275,16 +270,14 @@ class Simplifier(object):
     def handleArrayJoin(self, arr, joiner = ""):
         if type(joiner) is str:
             pass
-        elif type(joiner) is AstLiteral \
-                and joiner.value[0] == '"' \
-                and joiner.value[-1] == '"':
-            joiner = joiner.value[1:-1]
+        elif type(joiner) is AstLiteral:
+            joiner = joiner.value
         else:
             raise Exception("Joining arrays expected only with strings (got %s: %s)" % (type(joiner), pp.toString(joiner)))
 
         print "Simplifying array by joining"
         result = joiner.join(str(x.value)[1:-1] for x in arr)
-        return AstLiteral('"%s"' % result)
+        return AstLiteral('%s' % result)
 
     def displayValue(self, val):
         if type(val) is not str:

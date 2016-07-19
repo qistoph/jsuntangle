@@ -44,7 +44,7 @@ class PrettyPrinter(object):
         ret = "// %s" % node.text
         return ret
 
-    def printAstLiteral(self, node, quote = False):
+    def printAstLiteral(self, node, quote = True):
         ret = ""
         if type(node) is not AstLiteral:
             raise Exception("Can't print AstLiteral %s: %s" % (type(node), node))
@@ -57,8 +57,8 @@ class PrettyPrinter(object):
             ret = "false"
         #elif node.isUndefined:
             #ret = "undefined"
-        #elif node.isNumber:
-            #ret = "%g" % node.number
+        elif node.isNumber:
+            ret = "%g" % node.value
         #elif node.isJsObject:
             ##if node.isJsFunction:
                 #ret = 'JS-Function'
@@ -70,13 +70,13 @@ class PrettyPrinter(object):
                 #ret = '?UNKNOWN?'
         #elif node.isFixedArray:
             #ret = 'FixedArray'
-        else:
-            #ret = '<unknown literal %p>' % node
-        #elif node.isString
+        elif node.isString:
             if quote:
                 ret = '"%s"' % node.value
             else:
                 ret = '%s' % node.value
+        else:
+            ret = '<unknown literal %s>' % node.value
 
         return ret
 
