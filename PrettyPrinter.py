@@ -2,7 +2,7 @@ import traceback
 from Parser import AstNode, AstLiteral, AstOp
 import logging
 
-log = logging.getLogger("Untangle");
+log = logging.getLogger("Untangle")
 
 class NoIndent(object):
     def __init__(self, pp):
@@ -97,11 +97,11 @@ class PrettyPrinter(object):
         ret += self.toString(node.body)
         ret += "\n"
         self.indention -= 1
-        ret += "}"
+        ret += "})"
         return ret
 
     def printAstFunctionDeclaration(self, node):
-        ret = "function %s = %s;" % (self.toString(node.proxy), self.toString(node.body))
+        ret = "%s = %s;" % (self.toString(node.proxy), self.toString(node.body))
         return ret
 
     def printAstProperty(self, node):
@@ -136,7 +136,10 @@ class PrettyPrinter(object):
 
     def printAstCallRuntime(self, node):
         if node.name == "InitializeVarGlobal":
-            ret = '%s = %s' % (self.printAstLiteral(node.args[0], False), self.toString(node.args[2]))
+            if len(node.args) >= 3:
+                ret = '%s = %s' % (self.printAstLiteral(node.args[0], False), self.toString(node.args[2]))
+            else:
+                ret = '' #TODO: still leaves a ;
         else:
             ret = '%' + node.name + self.printArguments(node.args)
         return ret

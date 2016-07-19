@@ -332,6 +332,7 @@ class AST(object):
             PyV8.AST.Op.ASSIGN_SHR: AstOp.ASSIGN_SHR,
             PyV8.AST.Op.ASSIGN_SUB: AstOp.ASSIGN_SUB,
             PyV8.AST.Op.INIT_VAR: AstOp.INIT_VAR,
+            PyV8.AST.Op.INIT_CONST: AstOp.INIT_CONST,
             PyV8.AST.Op.COMMA: AstOp.COMMA,
             PyV8.AST.Op.OR: AstOp.OR,
             PyV8.AST.Op.AND: AstOp.AND,
@@ -550,6 +551,7 @@ AstOp.INC = AstOp("++")
 AstOp.DEC = AstOp("--")
 
 AstOp.INIT_VAR = AstOp("=init_var") #AST only
+AstOp.INIT_CONST = AstOp("=init_const") #AST only
 AstOp.ASSIGN = AstOp("=")
 AstOp.ASSIGN_BIT_OR = AstOp("|=")
 AstOp.ASSIGN_BIT_XOR = AstOp("^=")
