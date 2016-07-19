@@ -94,7 +94,7 @@ class Simplifier(object):
                     return AstLiteral(left.value / right.value)
                 #TODO: add other operators
 
-        return instr
+        return AstBinaryOperation(left, right, instr.op)
 
     def handleAstAssignment(self, ass):
         op = ass.op
