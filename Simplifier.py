@@ -156,15 +156,19 @@ class Simplifier(object):
             ret = AstLiteral(slen)
             return ret
 
-        # [0, 1, 2, 3, 4][2] // replace by 2
-        if type(obj) is AstArrayLiteral \
-            and type(key) is AstLiteral \
+        if type(obj) is AstArrayLiteral:
+            # [0, 1, 2, 3, 4][2] // replace by 2
+            if type(key) is AstLiteral \
             and type(key.value) is int:
-
-            index = key.value
-            ret = obj.values[index]
-            print "Replacing array %s[%s] by %s" % (pp.toString(obj), pp.toString(key), pp.toString(ret))
-            return ret
+                index = key.value
+                ret = obj.values[index]
+                print "Replacing array %s[%s] by %s" % (pp.toString(obj), pp.toString(key), pp.toString(ret))
+                return ret
+            # [0, 1, 2, 3, 4]["length"] // replace by 5
+            if type(key) is AstLiteral \
+            and key.value == 'length':
+                value = len(obj.values)
+                return AstLiteral(value)
 
         return AstProperty(obj, key)
 
