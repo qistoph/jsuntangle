@@ -1,7 +1,7 @@
 var arr;
 arr = ["123", "345", "456"];
 var a;
-a = ["123", "345", "456"]["length"];
+a = 3;
 var i;
 i = "123";
 var asdf;

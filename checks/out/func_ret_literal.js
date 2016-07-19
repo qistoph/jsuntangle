@@ -1,5 +1,5 @@
 shouldBeKept = (function shouldBeKept(a) {
-  return ((a + "-") + Math["random"]());
+  return a + "-" + Math["random"]();
 });
 replaceThis = (function replaceThis() {
   var data;

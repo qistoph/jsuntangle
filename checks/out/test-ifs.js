@@ -1,24 +1,24 @@
-if("true") {
+if(true) {
   shortCall();
 }
-if("true") {
+if(true) {
   shortCall();
 }
-if("true") {
+if(true) {
   firstCall();
   secondCall();
 }
-if("false") {
+if(false) {
   noCall();
 } else {
   doCall();
 }
-if("false") {
+if(false) {
   noCall();
 } else {
   doCall();
 }
-if("false") {
+if(false) {
   noCallOne();
   noCallTwo();
 } else {

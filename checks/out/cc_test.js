@@ -1,5 +1,5 @@
-if(("true" || "false")) {
-  FB = "true";
+if(true || false) {
+  FB = true;
 }
 var a;
 a = 5.8;
