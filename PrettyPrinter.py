@@ -1,5 +1,5 @@
 import traceback
-from Parser import AstNode, AstLiteral
+from Parser import AstNode, AstLiteral, AstOp
 import logging
 
 log = logging.getLogger("Untangle");
@@ -147,7 +147,7 @@ class PrettyPrinter(object):
         return ret
 
     def printAstAssignment(self, node):
-        ret = "%s %s %s" % (self.toString(node.target), node.op.op, self.toString(node.value))
+        ret = "%s %s %s" % (self.toString(node.target), self.toString(node.op), self.toString(node.value))
         return ret
 
     def printAstVariableProxy(self, node):
@@ -210,3 +210,9 @@ class PrettyPrinter(object):
 
     def printAstEmptyStatement(self, node):
         return self.indent(";")
+
+    def printAstOp(self, op):
+        if op == AstOp.INIT_VAR:
+            return '='
+        
+        return op.op

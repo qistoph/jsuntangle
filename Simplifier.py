@@ -53,8 +53,10 @@ class Simplifier(object):
             if type(right.value) is str:
                 return AstLiteral('"%s%s"' % (left.value[1:-1], right.value[1:-1]))
             else:
+                #TODO: shouldn't happen?
                 return AstLiteral('"%s%s"' % (left.value[1:-1], right.value))
         elif type(right.value) is str:
+            #TODO: shouldn't happen?
             return AstLiteral('"%s%s"' % (left.value, right.value[1:-1]))
         else:
             return AstLiteral(left.value + right.value)
@@ -66,10 +68,17 @@ class Simplifier(object):
             right = self.handle(instr.right)
 
             if type(left) is AstLiteral and type(right) is AstLiteral:
+                # "a" + "b" // replace by "ab"
+                # 1 + 2 + 3 // replace by 6
                 ret = self.binopAddLiterals(left, right)
                 print "Simplified to: %s" % ret.value
                 return ret
-            elif type(left) is AstBinaryOperation and type(left.right) is AstLiteral and type(right) is AstLiteral and left.op == AstOp.ADD:
+            elif type(left) is AstBinaryOperation \
+                    and type(left.right) is AstLiteral \
+                    and type(right) is AstLiteral \
+                    and left.op == AstOp.ADD:
+                # something() + "const1" + "const2"
+                # // replace by something + "const1const2"
                 val = self.binopAddLiterals(left.right, right)
                 return AstBinaryOperation(left.left, val, instr.op)
             else:
@@ -80,6 +89,15 @@ class Simplifier(object):
             return self.handle(instr.right)
         else:
             return instr
+
+    def handleAstAssignment(self, ass):
+        op = ass.op
+        binop = ass.binop
+        target = ass.target
+        value = self.handle(ass.value)
+        #TODO: set in scope instead of global
+        self.globalSet(target.name, value)
+        return AstAssignment(op, binop, target, value)
 
     def handleInitializeVarGlobal(self, name, language_mode, value = None):
         # build/v8_r19632/src/runtime.cc
@@ -103,11 +121,48 @@ class Simplifier(object):
     def handleAstVariableProxy(self, vp):
         name = vp.name
         if vp.name in self.js_global:
+            # var a = "asdf"
+            # var b = a // replace a by literal "asdf"
             value = self.js_global[vp.name]
             print "Replace variable %s with it's value %s" % (vp.name, self.displayValue(pp.toString(value)))
             return value
 
         return vp
+
+    def handleAstProperty(self, prop):
+        obj = self.handle(prop.obj)
+        key = self.handle(prop.key)
+
+        # "asdfasdf".length() // replace by 8
+        if type(obj) is AstLiteral \
+            and type(key) is AstLiteral \
+            and key.value.lower() == '"length"' \
+            and type(obj.value) is str:
+
+            slen = len(obj.value) - 2
+            print "Replacing %s[%s] by %d" % (pp.toString(obj), pp.toString(key), slen)
+            ret = AstLiteral(slen)
+            return ret
+
+        # [0, 1, 2, 3, 4][2] // replace by 2
+        if type(obj) is AstArrayLiteral \
+            and type(key) is AstLiteral \
+            and type(key.value) is int:
+
+            index = key.value
+            ret = obj.values[index]
+            print "Replacing array %s[%s] by %s" % (pp.toString(obj), pp.toString(key), pp.toString(ret))
+            return ret
+
+        return AstProperty(obj, key)
+
+    def handleAstFunctionDeclaration(self, decl):
+        body = self.handle(decl.body)
+        #TODO: set in scope not global
+
+        self.globalSet(decl.proxy.name, body)
+        decl = AstFunctionDeclaration(decl.proxy, body)
+        return decl
 
     def handleAstCall(self, call):
         print "handleAstCall: %s(%s)" % (pp.toString(call.expression), pp.toString(call.args))
@@ -116,24 +171,98 @@ class Simplifier(object):
         args = map(self.handle, call.args)
 
         if type(expr) is AstVariableProxy:
+            # eval(...)
             if expr.name == 'eval' and type(args[0]) is AstLiteral:
                 ret = self.handleWindowEval(args[0])
                 return ret
         elif type(expr) is AstProperty:
             obj = self.handle(expr.obj)
             key = self.handle(expr.key)
-            print "obj: %s" % (type(obj))
-            print "key: %s" % (type(key))
-            print "key: %s" % (key.value)
             if type(obj) is AstArrayLiteral \
                 and type(key) is AstLiteral \
                 and key.value == '"join"':
-                    ret = self.handleArrayJoin(obj.values, args[0])
+                    # ["a","b","c"].join("-")
+                    ret = self.handleArrayJoin(obj.values, *args)
                     return ret
+        elif type(expr) is AstFunctionLiteral:
+            func = expr
+            if len(func.body) == 1 and type(func.body[0]) is AstReturnStatement:
+                retStmt = func.body[0]
+                if type(retStmt.expression) is AstLiteral:
+                    # function(...) { return x; } // replace by x
+                    return retStmt.expression
+                elif type(retStmt.expression) is AstVariableProxy:
+                    # function(..., a, ...) { return a; } // replace by args[0]
+                    vp = retStmt.expression
+                    for i, parm in enumerate(func.parameters):
+                        if vp.name == parm.name:
+                            print "Function returns argument %d, replacing with value." % i
+                            return args[i]
+
+            # Function not simplified. Keeping the function call instead of literal is more readable
+            return call
         else:
             print "Call type: %s" % type(expr)
 
         return AstCall(expr, args)
+
+    def recursiveCount(self, ast, typ):
+        count = 0
+        if isinstance(ast, AstNode):
+            if type(ast) is typ:
+                count += 1
+
+            for n in dir(ast):
+                if n[0:2] == "__" and n[-2:] == "__":
+                    # Skip built-in attributes (__...__)
+                    continue
+                if hasattr(ast.__class__, n):
+                    # Skip class attributes
+                    continue
+                count += self.recursiveCount(getattr(ast, n), typ)
+        elif isinstance(ast, list):
+            for st in ast:
+                count += self.recursiveCount(st, typ)
+
+        return count
+
+    def recursiveFind(self, ast, typ):
+        ret = []
+        if isinstance(ast, AstNode):
+            if isinstance(ast, typ):
+                ret.append(ast)
+
+            for n in dir(ast):
+                if n[0:2] == "__" and n[-2:] == "__":
+                    # Skip built-in attributes (__...__)
+                    continue
+                if hasattr(ast.__class__, n):
+                    # Skip class attributes
+                    continue
+
+                ret.extend(self.recursiveFind(getattr(ast, n), typ))
+        elif isinstance(ast, list):
+            for st in ast:
+                ret.extend(self.recursiveFind(st, typ))
+
+        return ret
+
+    def handleAstFunctionLiteral(self, func):
+        name = func.name
+        scope = func.scope
+        body = map(self.handle, func.body)
+
+        returns = self.recursiveFind(body, AstReturnStatement)
+        print "AstFunctionLiteral %s has %d returns" % (name, len(returns))
+        if len(returns) == 1:
+            # Single return, assuming no logic for multiple returns
+            retStmt = returns[0]
+            if type(retStmt.expression) is AstLiteral:
+                # function(...) { return "asdf"; }
+                print "Replacing function-body with single return %s" % pp.toString(retStmt.expression)
+                body = [retStmt]
+
+        return AstFunctionLiteral(name, scope, body)
 
     def handleWindowEval(self, eval_arg):
         subScript = eval_arg.value[1:-1] # Remove quotes from literal TODO: fix in AstLiteral
@@ -152,13 +281,16 @@ class Simplifier(object):
 
         return block
 
-    def handleArrayJoin(self, arr, joiner):
-        if type(joiner) is not AstLiteral \
-                or joiner.value[0] != '"' \
-                or joiner.value[-1] != '"':
-                    raise Exception("Joining arrays expected only with strings (got %s: %s)", (type(joiner), pp.toString(joiner)))
+    def handleArrayJoin(self, arr, joiner = ""):
+        if type(joiner) is str:
+            pass
+        elif type(joiner) is AstLiteral \
+                and joiner.value[0] == '"' \
+                and joiner.value[-1] == '"':
+            joiner = joiner.value[1:-1]
+        else:
+            raise Exception("Joining arrays expected only with strings (got %s: %s)" % (type(joiner), pp.toString(joiner)))
 
-        joiner = joiner.value[1:-1]
         print "Simplifying array by joining"
         result = joiner.join(str(x.value)[1:-1] for x in arr)
         return AstLiteral('"%s"' % result)

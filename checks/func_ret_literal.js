@@ -9,16 +9,20 @@ function replaceThis() {
 }
 
 function replaceToo() {
-	var data = ["not", "not", "not", "keep", "not", "not"][3];
-	return data;
+	var dataToo = ["not", "not", "not", "keep", "not", "not"][3];
+	return dataToo;
 }
 
 function replaceThree() {
 	return "keep";
 }
 
-function replaceFour(data) {
-	return data;
+function replaceFour(dataFour) {
+	return dataFour;
+}
+
+function replaceFive() {
+	return ["one", "two", "keep", "four"][2];
 }
 
 function tooComplex() {
@@ -38,6 +42,7 @@ var test2 = replaceThis();
 var test3 = replaceToo();
 var test4 = replaceThree();
 var test5 = replaceFour("keep");
-var test6 = (function() { return "keep"; })();
-var test7 = tooComplex();
-var test8 = twoComplex();
+var test6 = replaceFive();
+var test7 = (function() { return "keep"; })();
+var test8 = tooComplex();
+var test9 = twoComplex();
