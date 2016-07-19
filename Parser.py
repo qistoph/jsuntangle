@@ -248,6 +248,10 @@ class AST(object):
                 val = int(val)
             except ValueError:
                 val = float(val)
+        elif litr.isTrue:
+            val = True
+        elif litr.isFalse:
+            val = False
         elif litr.isNull:
             val = None
         elif litr.isString:
