@@ -1,0 +1,10 @@
+var a;
+a = "a";
+var b;
+b = "b";
+var c;
+c = "c";
+var d;
+d = "d";
+var abcd;
+abcd = "abcd";

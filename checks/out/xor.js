@@ -1,0 +1,10 @@
+var a;
+a = 5;
+var b;
+b = 19;
+var d;
+d = 21;
+var e;
+;
+e = 21;
+d ^= c;
