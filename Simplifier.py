@@ -58,10 +58,10 @@ class Simplifier(object):
 
     def handleAstBinaryOperation(self, instr):
         print "handleAstBinaryOperation(%s, %s)" % (type(instr.left), type(instr.right))
-        if instr.op == AstOp.ADD:
-            left  = self.handle(instr.left)
-            right = self.handle(instr.right)
+        left  = self.handle(instr.left)
+        right = self.handle(instr.right)
 
+        if instr.op == AstOp.ADD:
             if type(left) is AstLiteral and type(right) is AstLiteral:
                 # "a" + "b" // replace by "ab"
                 # 1 + 2 + 3 // replace by 6
@@ -82,8 +82,19 @@ class Simplifier(object):
         elif instr.op == AstOp.COMMA:
             log.warning("Flattening COMMA operator. Not all parts are executed at this time.")
             return self.handle(instr.right)
-        else:
-            return instr
+        elif type(left) is AstLiteral \
+            and left.isNumber \
+            and type(right) is AstLiteral \
+            and right.isNumber:
+                if instr.op == AstOp.SUB:
+                    return AstLiteral(left.value - right.value)
+                elif instr.op == AstOp.MUL:
+                    return AstLiteral(left.value * right.value)
+                elif instr.op == AstOp.DIV:
+                    return AstLiteral(left.value / right.value)
+                #TODO: add other operators
+
+        return instr
 
     def handleAstAssignment(self, ass):
         op = ass.op
