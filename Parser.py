@@ -71,8 +71,8 @@ class AST(object):
             next_inst = next(instructions, None)
 
         #var_dump(self.statements)
-        serialized = jsonpickle.encode(self.statements)
-        print json.dumps(json.loads(serialized), indent=4)
+        #serialized = jsonpickle.encode(self.statements)
+        #print json.dumps(json.loads(serialized), indent=4)
 
     def handle(self, statement):
         try:

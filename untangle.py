@@ -71,7 +71,7 @@ def main(argv):
     simpler = sfier.handle(statements)
     print "After simplifying"
     script = printer.toString(simpler)
-    f_out.write(script)
+    print f_out, script
     if f_out != sys.stdout:
         f_out.close()
 
