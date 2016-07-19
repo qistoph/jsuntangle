@@ -25,6 +25,17 @@ function replaceFive() {
 	return ["one", "two", "keep", "four"][2];
 }
 
+function replaceSix(argSix) {
+	return argSix;
+}
+
+function replaceSeven(argSeven) {
+	if(Math.random() > 0.5) {
+		// Do nothing
+	}
+	return argSeven;
+}
+
 function tooComplex() {
 	if(Math.random() > 0.5) {
 		return "A";
@@ -46,3 +57,5 @@ var test6 = replaceFive();
 var test7 = (function() { return "keep"; })();
 var test8 = tooComplex();
 var test9 = twoComplex();
+var test10 = replaceSix("dataSix");
+var test11 = replaceSeven("dataSeven");
