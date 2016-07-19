@@ -17,6 +17,16 @@ trap control_c SIGINT
 
 cd "$(dirname $0)"
 for FILE in *.js; do
+	echo -n "$FILE "
+
+	set +o errexit
 	../untangle.py -c "$FILE" "temp/$FILE" >/dev/null 2>&1
-	cmp -s "temp/$FILE" "out/$FILE" && echo "$FILE OK" || echo "$FILE FAILED"
+	EXIT=$?
+	set -o errexit
+
+	if [ $EXIT -eq 0 ]; then
+		cmp -s "temp/$FILE" "out/$FILE" && echo "OK" || echo "CHANGED"
+	else
+		echo "FAILED"
+	fi
 done
