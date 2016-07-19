@@ -70,7 +70,10 @@ def main(argv):
     sfier = Simplifier()
     simpler = sfier.handle(statements)
     print "After simplifying"
-    print printer.toString(simpler)
+    script = printer.toString(simpler)
+    f_out.write(script)
+    if f_out != sys.stdout:
+        f_out.close()
 
     #scriptAst = parser.handle(scriptText)
 
@@ -95,14 +98,12 @@ def main(argv):
         #j_out = open(options['ast'], 'w')
         #j_out.write(handler.json)
         #j_out.close()
-#
-    #if options['verify']:
-        #glob = JSClass()
-        #with PyV8.JSContext(glob, extensions=exts) as ctxt:
-            #PyV8.JSEngine().compile(script)
+
+    if options['verify']:
+        AST(script)
 
         # If no exception in compile(...):
-        #print "Output is valid JavaScript"
+        print "Output is valid JavaScript"
 
 if __name__ == '__main__':
     main(sys.argv[1:])
