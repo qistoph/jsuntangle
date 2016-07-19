@@ -94,6 +94,11 @@ class Simplifier(object):
         self.globalSet(target.name, value)
         return AstAssignment(op, binop, target, value)
 
+    def handleAstVariableDeclaration(self, decl):
+        mode = decl.mode
+        proxy = decl.proxy # Don't simply this
+        return AstVariableDeclaration(mode, proxy)
+
     def handleInitializeVarGlobal(self, name, language_mode, value = None):
         # build/v8_r19632/src/runtime.cc
         # args[0] == name
