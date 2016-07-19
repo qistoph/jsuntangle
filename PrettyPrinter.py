@@ -135,7 +135,10 @@ class PrettyPrinter(object):
         return ret
 
     def printAstCallRuntime(self, node):
-        ret = '%' + node.name + self.printArguments(node.args)
+        if node.name == "InitializeVarGlobal":
+            ret = '%s = %s' % (self.printAstLiteral(node.args[0], False), self.toString(node.args[2]))
+        else:
+            ret = '%' + node.name + self.printArguments(node.args)
         return ret
     
     def printAstCall(self, node):
