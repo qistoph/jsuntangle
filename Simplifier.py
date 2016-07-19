@@ -156,10 +156,14 @@ class Simplifier(object):
 
         return AstProperty(obj, key)
 
+    simplifyFunctionDecl = False
     def handleAstFunctionDeclaration(self, decl):
-        body = self.handle(decl.body)
-        #TODO: set in scope not global
+        if self.simplifyFunctionDecl:
+            body = self.handle(decl.body)
+        else:
+            body = decl.body
 
+        #TODO: set in scope not global
         self.globalSet(decl.proxy.name, body)
         decl = AstFunctionDeclaration(decl.proxy, body)
         return decl
@@ -185,7 +189,7 @@ class Simplifier(object):
                     ret = self.handleArrayJoin(obj.values, *args)
                     return ret
         elif type(expr) is AstFunctionLiteral:
-            func = expr
+            func = self.handle(expr)
             if len(func.body) == 1 and type(func.body[0]) is AstReturnStatement:
                 retStmt = func.body[0]
                 if type(retStmt.expression) is AstLiteral:
@@ -205,26 +209,6 @@ class Simplifier(object):
             print "Call type: %s" % type(expr)
 
         return AstCall(expr, args)
-
-    def recursiveCount(self, ast, typ):
-        count = 0
-        if isinstance(ast, AstNode):
-            if type(ast) is typ:
-                count += 1
-
-            for n in dir(ast):
-                if n[0:2] == "__" and n[-2:] == "__":
-                    # Skip built-in attributes (__...__)
-                    continue
-                if hasattr(ast.__class__, n):
-                    # Skip class attributes
-                    continue
-                count += self.recursiveCount(getattr(ast, n), typ)
-        elif isinstance(ast, list):
-            for st in ast:
-                count += self.recursiveCount(st, typ)
-
-        return count
 
     def recursiveFind(self, ast, typ):
         ret = []
@@ -257,10 +241,17 @@ class Simplifier(object):
         if len(returns) == 1:
             # Single return, assuming no logic for multiple returns
             retStmt = returns[0]
-            if type(retStmt.expression) is AstLiteral:
+            retValue = retStmt.expression
+            if type(retValue) is AstLiteral:
                 # function(...) { return "asdf"; }
                 print "Replacing function-body with single return %s" % pp.toString(retStmt.expression)
                 body = [retStmt]
+            elif type(retValue) is AstVariableProxy:
+                # function(..., a, ...) { return a; }
+                for i, parm in enumerate(func.parameters):
+                    if retValue.name == parm.name:
+                        print "Replacing function-body with single return %s" % parm.name
+                        body = [retStmt]
 
         return AstFunctionLiteral(name, scope, body)
 
