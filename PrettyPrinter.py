@@ -117,7 +117,8 @@ class PrettyPrinter(object):
         return ret
 
     def printAstBinaryOperation(self, node):
-        ret = "(%s %s %s)" % (self.toString(node.left), node.op.op, self.toString(node.right))
+        # Leaving out brackets, precedense should work without
+        ret = "%s %s %s" % (self.toString(node.left), node.op.op, self.toString(node.right))
         return ret
 
     def printAstCompareOperation(self, node):
