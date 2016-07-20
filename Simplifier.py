@@ -29,7 +29,7 @@ class Simplifier(object):
                 ret = handler(ast)
                 return ret
             else:
-                log.debug("No handler %s" % handlerName)
+                #log.debug("No handler %s" % handlerName)
                 for n in dir(ast):
                     if n[0:2] == "__" and n[-2:] == "__":
                         # Skip built-in attributes (__...__)
@@ -172,7 +172,7 @@ class Simplifier(object):
 
         return AstProperty(obj, key)
 
-    simplifyFunctionDecl = False
+    simplifyFunctionDecl = True
     def handleAstFunctionDeclaration(self, decl):
         if self.simplifyFunctionDecl:
             body = self.handle(decl.body)
@@ -191,6 +191,7 @@ class Simplifier(object):
         args = map(self.handle, call.args)
 
         if type(expr) is AstVariableProxy:
+            #TODO: add configuration to not execute eval
             # eval(...)
             if expr.name == 'eval' and type(args[0]) is AstLiteral:
                 ret = self.handleWindowEval(args[0])

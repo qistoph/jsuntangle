@@ -12,6 +12,7 @@ def var_dump(obj, indent = 0):
     if type(obj) is str:
         print ind+" - %s" % obj
     elif type(obj) is list:
+        print "IS LIST len: %d" % len(obj)
         for o in obj:
             var_dump(o, indent+1)
     else:
@@ -21,6 +22,8 @@ def var_dump(obj, indent = 0):
             print ind+"- %s" % n
             if (getattr(type(obj), n, None)) is None:
                 var_dump(getattr(obj, n), indent+1)
+            else:
+                print ind+"  - None"
 
 
 class AST(object):
@@ -218,8 +221,11 @@ class AST(object):
         ret = AstCall(expr, args)
         return ret
 
-    def handleAstCallNew(self, expr):
-        raise Exception('TODO')
+    def handleAstCallNew(self, call):
+        expr = self.handle(call.expression)
+        args = map(self.handle, call.args)
+        ret = AstCallNew(expr, args)
+        return ret
 
     def handleAstCallRuntime(self, expr):
         name = expr.name
@@ -485,6 +491,11 @@ class AstFunctionDeclaration(AstNode):
         self.body = body
 
 class AstCall(AstExpression):
+    def __init__(self, expression, args):
+        self.expression = expression
+        self.args = args
+
+class AstCallNew(AstExpression):
     def __init__(self, expression, args):
         self.expression = expression
         self.args = args

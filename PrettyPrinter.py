@@ -149,6 +149,10 @@ class PrettyPrinter(object):
         ret = "%s%s" % (self.toString(node.expression), self.printArguments(node.args))
         return ret
 
+    def printAstCallNew(self, node):
+        ret = "new %s%s" % (self.toString(node.expression), self.printArguments(node.args))
+        return ret
+
     def printAstReturnStatement(self, node):
         ret = self.indent("return %s;" % (self.toString(node.expression)))
         return ret
@@ -223,3 +227,7 @@ class PrettyPrinter(object):
             return '='
         
         return op.op
+
+    def printAstTODO(self, op):
+        log.warning("Printing AstTODO")
+        return op.text
