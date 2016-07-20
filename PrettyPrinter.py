@@ -245,5 +245,5 @@ class PrettyPrinter(object):
         return op.op
 
     def printAstTODO(self, op):
-        log.warning("Printing AstTODO")
+        log.warning("Printing AstTODO (%s): %s" % (op.pyv8Type, op.text))
         return op.text

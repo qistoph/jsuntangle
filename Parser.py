@@ -12,7 +12,6 @@ def var_dump(obj, indent = 0):
     if type(obj) is str:
         print ind+" - %s" % obj
     elif type(obj) is list:
-        print "IS LIST len: %d" % len(obj)
         for o in obj:
             var_dump(o, indent+1)
     else:
@@ -60,7 +59,7 @@ class AST(object):
                     handler = getattr(self, 'handleAst%s' % statement.type)
                 except AttributeError:
                     log.warning("No handler (handleAst%s)" % statement.type)
-                    return AstTODO(statement.__str__())
+                    return AstTODO(statement.__str__(), statement.type)
 
                 ret = handler(statement)
                 if not isinstance(ret, AstNode):
@@ -392,8 +391,9 @@ class AstNode(object):
     pass
 
 class AstTODO(AstNode):
-    def __init__(self, text):
+    def __init__(self, text, pyv8Type = None):
         self.text = text
+        self.pyv8Type = pyv8Type
 
 class AstComment(AstNode):
     def __init__(self, text):
