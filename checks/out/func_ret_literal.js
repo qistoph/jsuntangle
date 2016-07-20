@@ -35,7 +35,7 @@ twoComplex = (function twoComplex() {
   var a;
   var a;
   a = (Math["random"]() > 0.5) ? "A" : "B";
-  return (Math["random"]() > 0.5) ? "A" : "B";
+  return a;
 });
 var test1;
 test1 = shouldBeKept();
