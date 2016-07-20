@@ -40,6 +40,7 @@ function yesno() {
 	done
 }
 
+cd "$(dirname $0)"
 for FILE in *.js; do
 	echo -n "$FILE "
 
