@@ -60,6 +60,11 @@ def main(argv):
 
     parser = AST(scriptText)
     print "done AST"
+    if options['ast'] != False:
+        print "Writing AST to %s" % options['ast']
+        j_out = open(options['ast'], 'w')
+        j_out.write(parser.json)
+        j_out.close()
 
     program = parser.program
 
@@ -93,12 +98,6 @@ def main(argv):
         #if f_out != sys.stdout:
             #f_out.close()
 #
-    if options['ast'] != False:
-        print "Writing AST to %s" % options['ast']
-        j_out = open(options['ast'], 'w')
-        j_out.write(parser.json)
-        j_out.close()
-
     if options['verify']:
         AST(script)
 
