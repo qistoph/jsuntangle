@@ -20,21 +20,21 @@ class Simplifier(object):
         while n >= 0:
             scope = self.scopes[n]
             for parm in scope.parameters:
-                print "set scope param - %s" % (parm.name)
+                #print "set scope param - %s" % (parm.name)
                 if parm.name == name:
                     scope.values[name] = value
                     return
             for decl in scope.declarations:
-                print "set scope %d - %s" % (n, decl.proxy.name)
+                #print "set scope %d - %s" % (n, decl.proxy.name)
                 if decl.proxy.name == name:
-                    print "Found in scope %d" % n
+                    #print "Found in scope %d" % n
                     scope.values[name] = value
                     return
-            print "Not found in scope %d" % n
+            #print "Not found in scope %d" % n
             n -= 1
 
-        print "Not found in any scope: %s" % name
-        log.warning("Not found in any scope: %s" % name)
+        #print "Not found in any scope: %s" % name
+        log.warning("Not found in any scope, set: %s" % name)
         self.scopes[0].values[name] = value
 
     def scopeGet(self, name):
@@ -47,7 +47,7 @@ class Simplifier(object):
 
             n -= 1
 
-        log.warning("Not found in any scope: %s" % name)
+        log.warning("Not found in any scope, get: %s" % name)
         return None
 
     def handle(self, ast):
