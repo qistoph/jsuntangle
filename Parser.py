@@ -557,6 +557,7 @@ class AstScope(AstNode):
     def __init__(self, parameters, declarations):
         self.parameters = parameters
         self.declarations = declarations
+        self.values = {}
 
 class AstOp(AstNode):
     def __init__(self, op):

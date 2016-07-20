@@ -10,10 +10,34 @@ pp = PrettyPrinter()
 class Simplifier(object):
     def __init__(self):
         self.js_global = {}
+        self.scopes = [];
 
     def globalSet(self, name, value):
-        print "Set global %s = %s" % (name, value)
+        print "Set global %s = %s" % (name, self.displayValue(value))
         self.js_global[name] = value
+
+    def scopeSet(self, name, value):
+        print "Set in scope %s = %s" % (name, self.displayValue(value))
+        n = len(self.scopes) - 1
+        while n >= 0:
+            scope = self.scopes[n]
+            for parm in scope.parameters:
+                print "scope param - %s" % (parm.name)
+                if parm.name == name:
+                    scope.values[name] = value
+                    return
+            for decl in scope.declarations:
+                print "scope %d - %s" % (n, decl.proxy.name)
+                if decl.proxy.name == name:
+                    print "Found in scope %d" % n
+                    scope.values[name] = value
+                    return
+            print "Not found in scope %d" % n
+            n -= 1
+        else:
+            print "Not found in any scope, set in global"
+
+        self.globalSet(name, value)
 
     def globalGet(self, name, defValue):
         pass
@@ -105,7 +129,7 @@ class Simplifier(object):
         #TODO: if op then simplify (e.g.: a=1;b=3;b^=a => a=1;b=3;b=2
 
         if type(target) is AstVariableProxy:
-            self.globalSet(target.name, value)
+            self.scopeSet(target.name, value)
         return AstAssignment(op, binop, target, value)
 
     def handleAstVariableDeclaration(self, decl):
@@ -182,7 +206,7 @@ class Simplifier(object):
             body = decl.body
 
         #TODO: set in scope not global
-        self.globalSet(decl.proxy.name, body)
+        self.scopeSet(decl.proxy.name, body)
         decl = AstFunctionDeclaration(decl.proxy, body)
         return decl
 
@@ -253,7 +277,9 @@ class Simplifier(object):
     def handleAstFunctionLiteral(self, func):
         name = func.name
         scope = func.scope
+        self.scopes.append(scope)
         body = map(self.handle, func.body)
+        self.scopes.pop()
 
         returns = self.recursiveFind(body, AstReturnStatement)
         print "AstFunctionLiteral %s has %d returns" % (name, len(returns))
