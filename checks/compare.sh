@@ -45,7 +45,7 @@ for FILE in *.js; do
 	echo -n "$FILE "
 
 	set +o errexit
-	../untangle.py -c "$FILE" "temp/$FILE" >/dev/null 2>&1
+	../jsuntangle/jsuntangle.py -c "$FILE" "temp/$FILE" >/dev/null 2>&1
 	EXIT=$?
 	set -o errexit
 
