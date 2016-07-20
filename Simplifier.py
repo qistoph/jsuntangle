@@ -33,29 +33,18 @@ class Simplifier(object):
             print "Not found in scope %d" % n
             n -= 1
 
+        print "Not found in any scope: %s" % name
         log.warning("Not found in any scope: %s" % name)
         self.scopes[0].values[name] = value
 
     def scopeGet(self, name):
+        print "Get from scope %s" % name
         n = len(self.scopes) - 1
         while n >= 0:
             scope = self.scopes[n]
-            for parm in scope.parameters:
-                print "get scope param - %s" % (parm.name)
-                if parm.name == name:
-                    if name in scope.values:
-                        return scope.values[name]
-                    else:
-                        # Parm is in scope, but not set (javascript error?)
-                        return None
-            for decl in scope.declarations:
-                print "get scope %d - %s" % (n, decl.proxy.name)
-                if decl.proxy.name == name:
-                    if name in scope.values:
-                        return scope.values[name]
-                    else:
-                        # Parm is in scope, but not set (javascript error?)
-                        return None
+            if name in scope.values:
+                return scope.values[name]
+
             n -= 1
 
         log.warning("Not found in any scope: %s" % name)
@@ -181,8 +170,11 @@ class Simplifier(object):
         if value is not None:
             # var a = "asdf"
             # var b = a // replace a by literal "asdf"
-            print "Replace variable %s with it's value %s" % (vp.name, self.displayValue(pp.toString(value)))
-            return value
+            if type(value) in [AstLiteral, AstArrayLiteral, AstFunctionLiteral]:
+                print "Replace variable %s with it's value (%s) %s" % (vp.name, type(value), self.displayValue(pp.toString(value)))
+                return value
+            else:
+                print "Variable %s not replaced with (%s) %s" % (vp.name, type(value), self.displayValue(pp.toString(value)))
 
         return vp
 
