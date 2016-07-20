@@ -4,13 +4,10 @@ shouldBeKept = (function shouldBeKept(a) {
 replaceThis = (function replaceThis() {
   var data;
   var n;
-  data = ["not", "not", "not", "keep", "not", "not"];
-  n = 3;
   return "keep";
 });
 replaceToo = (function replaceToo() {
   var dataToo;
-  dataToo = "keep";
   return "keep";
 });
 replaceThree = (function replaceThree() {
@@ -26,9 +23,6 @@ replaceSix = (function replaceSix(argSix) {
   return argSix;
 });
 replaceSeven = (function replaceSeven(argSeven) {
-  if((Math["random"]() > 0.5)) {
-
-  }
   return argSeven;
 });
 tooComplex = (function tooComplex() {
@@ -38,6 +32,7 @@ tooComplex = (function tooComplex() {
   return "B";
 });
 twoComplex = (function twoComplex() {
+  var a;
   var a;
   a = (Math["random"]() > 0.5) ? "A" : "B";
   return (Math["random"]() > 0.5) ? "A" : "B";

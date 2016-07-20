@@ -26,6 +26,8 @@ class PrettyPrinter(object):
         elif isinstance(node, AstNode):
             printMethod = getattr(self, 'print%s' % type(node).__name__)
             return printMethod(node)
+        elif node is None:
+            return ""
         else:
             raise Exception("Only AstNode's or lists of AstNode's can be printed, not %s" % type(node))
 

@@ -9,41 +9,57 @@ pp = PrettyPrinter()
 
 class Simplifier(object):
     def __init__(self):
-        self.js_global = {}
         self.scopes = [];
 
-    def globalSet(self, name, value):
-        print "Set global %s = %s" % (name, self.displayValue(value))
-        self.js_global[name] = value
-
     def scopeSet(self, name, value):
-        print "Set in scope %s = %s" % (name, self.displayValue(value))
+        print "Setting in scope %s = %s" % (name, self.displayValue(value))
+
+        assert(value is not None)
+
         n = len(self.scopes) - 1
         while n >= 0:
             scope = self.scopes[n]
             for parm in scope.parameters:
-                print "scope param - %s" % (parm.name)
+                print "set scope param - %s" % (parm.name)
                 if parm.name == name:
                     scope.values[name] = value
                     return
             for decl in scope.declarations:
-                print "scope %d - %s" % (n, decl.proxy.name)
+                print "set scope %d - %s" % (n, decl.proxy.name)
                 if decl.proxy.name == name:
                     print "Found in scope %d" % n
                     scope.values[name] = value
                     return
             print "Not found in scope %d" % n
             n -= 1
-        else:
-            print "Not found in any scope, set in global"
 
-        self.globalSet(name, value)
+        log.warning("Not found in any scope: %s" % name)
+        self.scopes[0].values[name] = value
 
-    def globalGet(self, name, defValue):
-        pass
+    def scopeGet(self, name):
+        n = len(self.scopes) - 1
+        while n >= 0:
+            scope = self.scopes[n]
+            for parm in scope.parameters:
+                print "get scope param - %s" % (parm.name)
+                if parm.name == name:
+                    if name in scope.values:
+                        return scope.values[name]
+                    else:
+                        # Parm is in scope, but not set (javascript error?)
+                        return None
+            for decl in scope.declarations:
+                print "get scope %d - %s" % (n, decl.proxy.name)
+                if decl.proxy.name == name:
+                    if name in scope.values:
+                        return scope.values[name]
+                    else:
+                        # Parm is in scope, but not set (javascript error?)
+                        return None
+            n -= 1
 
-    def globalGet(self, name):
-        pass
+        log.warning("Not found in any scope: %s" % name)
+        return None
 
     def handle(self, ast):
         if isinstance(ast, AstNode):
@@ -125,12 +141,13 @@ class Simplifier(object):
         binop = ass.binop
         target = ass.target
         value = self.handle(ass.value)
-        #TODO: set in scope instead of global
         #TODO: if op then simplify (e.g.: a=1;b=3;b^=a => a=1;b=3;b=2
 
         if type(target) is AstVariableProxy:
             self.scopeSet(target.name, value)
-        return AstAssignment(op, binop, target, value)
+        ret = AstAssignment(op, binop, target, value)
+        print "Returning AstAssignment: %s" % (self.displayValue(ret))
+        return ret
 
     def handleAstVariableDeclaration(self, decl):
         mode = decl.mode
@@ -144,7 +161,8 @@ class Simplifier(object):
         # args[2] == value (optional)
 
         name = name.value
-        self.globalSet(name, value)
+        if value is not None:
+            self.scopeSet(name, value)
 
     def handleAstCallRuntime(self, expr):
         name = expr.name
@@ -158,10 +176,11 @@ class Simplifier(object):
 
     def handleAstVariableProxy(self, vp):
         name = vp.name
-        if vp.name in self.js_global:
+
+        value = self.scopeGet(vp.name)
+        if value is not None:
             # var a = "asdf"
             # var b = a // replace a by literal "asdf"
-            value = self.js_global[vp.name]
             print "Replace variable %s with it's value %s" % (vp.name, self.displayValue(pp.toString(value)))
             return value
 
@@ -205,7 +224,6 @@ class Simplifier(object):
         else:
             body = decl.body
 
-        #TODO: set in scope not global
         self.scopeSet(decl.proxy.name, body)
         decl = AstFunctionDeclaration(decl.proxy, body)
         return decl
@@ -278,6 +296,9 @@ class Simplifier(object):
         name = func.name
         scope = func.scope
         self.scopes.append(scope)
+        #TODO: do we really want to clear all values or are there some to be kept?
+        #For now this fixes an infinite loop, like checks/crash-eba65bc.js
+        scope.values = {}
         body = map(self.handle, func.body)
         self.scopes.pop()
 
@@ -307,11 +328,12 @@ class Simplifier(object):
 
         print "Handling subscript (for eval): %s" % (self.displayValue(subScript))
         subScriptAst = AST(subScript)
-        subScriptSimple = self.handle(subScriptAst.statements)
+        #TODO: do we need the scope here?
+        subScriptSimple = self.handle(subScriptAst.program.body)
 
         statements = []
         statements.append(AstComment("Pre eval(%s)" % self.displayValue(eval_arg)))
-        statements.append(subScriptAst.statements)
+        statements.append(subScriptSimple)
         statements.append(AstComment("Post eval(%s)" % self.displayValue(eval_arg)))
         block = AstBlock(statements)
 

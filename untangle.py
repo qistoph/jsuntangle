@@ -61,16 +61,16 @@ def main(argv):
     parser = AST(scriptText)
     print "done AST"
 
-    statements = parser.statements
+    program = parser.program
 
     printer = PrettyPrinter()
     print "Before simplifying"
-    print printer.toString(statements)
+    print printer.toString(program.body)
 
     sfier = Simplifier()
-    simpler = sfier.handle(statements)
+    simpler = sfier.handle(program)
     print "After simplifying"
-    script = printer.toString(simpler)
+    script = printer.toString(simpler.body)
     print >>f_out, script
     if f_out != sys.stdout:
         f_out.close()

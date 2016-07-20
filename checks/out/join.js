@@ -1,12 +1,12 @@
 var a;
 a = ["a", "s", "d", "f"];
 var b;
-b = "---";
+b = "a-s-d-f";
 var c;
 c = ["A", "B", "C", "D"];
 var d;
 d = "join";
 var e;
-e = "|||";
+e = "A|B|C|D";
 var f;
-f = "";
+f = "abc";

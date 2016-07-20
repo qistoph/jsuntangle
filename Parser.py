@@ -29,8 +29,6 @@ def var_dump(obj, indent = 0):
 class AST(object):
     def __init__(self, script):
         self.indent = 0
-        self.statements = []
-
         self.walk(script)
     
     def walk(self, script):
@@ -47,31 +45,7 @@ class AST(object):
         self.json = prog.toJSON()
         #log.debug(self.json)
 
-        #TODO: program is actually FunctionLiteral
-        #ret = self.handle(prog)
-        #self.statements.append(ret)
-        #var_dump(ret)
-        #return ret
-
-        decls = iter(prog.scope.declarations)
-        instructions = iter(prog.body)
-
-        decl = next(decls, None)
-        inst = next(instructions, None)
-        next_inst = next(instructions, None)
-
-        while inst is not None:
-            while decl is not None and (next_inst is None or decl.pos < next_inst.pos):
-                result = self.handle(decl)
-                self.statements.append(result)
-
-                decl = next(decls, None)
-
-            result = self.handle(inst)
-            self.statements.append(result)
-
-            inst = next_inst
-            next_inst = next(instructions, None)
+        self.program = self.handle(prog)
 
         #var_dump(self.statements)
         #serialized = jsonpickle.encode(self.statements)
@@ -242,8 +216,27 @@ class AST(object):
     def handleAstFunctionLiteral(self, litr):
         name = litr.name
         scope = self.handle(litr.scope)
-        body = map(self.handle, litr.body)
-        
+        body = []
+
+        decls = iter(litr.scope.declarations)
+        insts = iter(litr.body)
+
+        decl = next(decls, None)
+        inst = next(insts, None)
+        next_inst = next(insts, None)
+
+        while inst is not None:
+            while decl is not None and (next_inst is None or decl.pos < next_inst.pos):
+                result = self.handle(decl)
+                body.append(result)
+                decl = next(decls, None)
+
+            result = self.handle(inst)
+            body.append(result)
+
+            inst = next_inst
+            next_inst = next(insts, None)
+
         ret = AstFunctionLiteral(name, scope, body)
         return ret
 
