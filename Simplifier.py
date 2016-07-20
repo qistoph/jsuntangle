@@ -332,6 +332,7 @@ class Simplifier(object):
     def displayValue(self, val):
         if type(val) is not str:
             val = pp.toString(val)
+        val = re.sub('\s+', ' ', val)
         if len(val) > 40:
             val = val[0:37] + '...'
         return val
