@@ -1,42 +1,42 @@
-shouldBeKept = (function shouldBeKept(a) {
+shouldBeKept = function shouldBeKept(a) {
   return a + "-" + Math["random"]();
-});
-replaceThis = (function replaceThis() {
+};
+replaceThis = function replaceThis() {
   var data;
   var n;
   return "keep";
-});
-replaceToo = (function replaceToo() {
+};
+replaceToo = function replaceToo() {
   var dataToo;
   return "keep";
-});
-replaceThree = (function replaceThree() {
+};
+replaceThree = function replaceThree() {
   return "keep";
-});
-replaceFour = (function replaceFour(dataFour) {
+};
+replaceFour = function replaceFour(dataFour) {
   return dataFour;
-});
-replaceFive = (function replaceFive() {
+};
+replaceFive = function replaceFive() {
   return "keep";
-});
-replaceSix = (function replaceSix(argSix) {
+};
+replaceSix = function replaceSix(argSix) {
   return argSix;
-});
-replaceSeven = (function replaceSeven(argSeven) {
+};
+replaceSeven = function replaceSeven(argSeven) {
   return argSeven;
-});
-tooComplex = (function tooComplex() {
+};
+tooComplex = function tooComplex() {
   if((Math["random"]() > 0.5)) {
     return "A";
   }
   return "B";
-});
-twoComplex = (function twoComplex() {
+};
+twoComplex = function twoComplex() {
   var a;
   var a;
   a = (Math["random"]() > 0.5) ? "A" : "B";
   return a;
-});
+};
 var test1;
 test1 = shouldBeKept();
 var test2;

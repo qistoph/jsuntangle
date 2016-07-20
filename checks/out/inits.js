@@ -1,7 +1,7 @@
 var a;
 ;
 var b;
-f = (function f() {
+f = function f() {
   var c;
   var d;
   b = 2;
@@ -9,5 +9,5 @@ f = (function f() {
 
   var d;
   d = 3;
-});
+};
 b = 1;

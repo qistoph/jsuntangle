@@ -1,5 +1,5 @@
 import traceback
-from Parser import AstNode, AstLiteral, AstOp
+from Parser import AstNode, AstLiteral, AstOp, AstFunctionLiteral
 import logging
 
 log = logging.getLogger("Untangle")
@@ -91,7 +91,7 @@ class PrettyPrinter(object):
 
     def printAstFunctionLiteral(self, node):
         print "node.scope.declarations: %s" % type(node.scope.declarations)
-        ret = "(function %s(%s) {\n" % (node.name, ", ".join(param.name for param in node.scope.parameters))
+        ret = "function %s(%s) {\n" % (node.name, ", ".join(param.name for param in node.scope.parameters))
         self.indention += 1
         if len(node.scope.declarations) > 0:
             ret += self.toString(node.scope.declarations)
@@ -99,11 +99,11 @@ class PrettyPrinter(object):
         ret += self.toString(node.body)
         ret += "\n"
         self.indention -= 1
-        ret += "})"
+        ret += self.indent("}")
         return ret
 
     def printAstFunctionDeclaration(self, node):
-        ret = "%s = %s;" % (self.toString(node.proxy), self.toString(node.body))
+        ret = self.indent("%s = %s;" % (self.toString(node.proxy), self.toString(node.body)))
         return ret
 
     def printAstProperty(self, node):
@@ -148,7 +148,10 @@ class PrettyPrinter(object):
         return ret
     
     def printAstCall(self, node):
-        ret = "%s%s" % (self.toString(node.expression), self.printArguments(node.args))
+        if type(node.expression) is AstFunctionLiteral:
+            ret = "(%s)%s" % (self.toString(node.expression), self.printArguments(node.args))
+        else:
+            ret = "%s%s" % (self.toString(node.expression), self.printArguments(node.args))
         return ret
 
     def printAstCallNew(self, node):

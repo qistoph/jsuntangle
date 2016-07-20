@@ -11,8 +11,8 @@ a = 9;
 var b;
 b = 8;
 var a1;
-testIt = (function testIt() {
+testIt = function testIt() {
   return math["random"]();
-});
+};
 a1 = 2;
 testIt();
