@@ -283,6 +283,25 @@ class AST(object):
         ret = AstReturnStatement(expr)
         return ret
 
+    def handleAstTryStatement(self, stmt):
+        tryBlock = self.handle(stmt.tryBlock)
+        ret = AstTryStatement(tryBlock)
+        return ret
+
+    def handleAstTryCatchStatement(self, stmt):
+        tryBlock = self.handle(stmt.tryBlock)
+        scope = self.handle(stmt.scope)
+        variable = self.handle(stmt.variable)
+        catchBlock = self.handle(stmt.catchBlock)
+        ret = AstTryCatchStatement(tryBlock, scope, variable, catchBlock)
+        return ret
+
+    def handleAstTryFinallyStatement(self, stmt):
+        tryBlock = self.handle(stmt.tryBlock)
+        finallyBlock = self.handle(stmt.finallyBlock)
+        ret = AstTryFinallyStatement(tryBlock, finallyBlock)
+        return ret
+
     def handleAstCompareOperation(self, stmt):
         left = self.handle(stmt.left)
         right = self.handle(stmt.right)
@@ -539,6 +558,23 @@ class AstFunctionLiteral(AstExpression):
 class AstReturnStatement(AstStatement):
     def __init__(self, expression):
         self.expression = expression
+
+class AstTryStatement(AstStatement):
+    def __init__(self, tryBlock):
+        #TODO do we need 'targets'?
+        self.tryBlock = tryBlock
+
+class AstTryCatchStatement(AstTryStatement):
+    def __init__(self, tryBlock, scope, variable, catchBlock):
+        super(self.__class__, self).__init__(tryBlock)
+        self.scope = scope
+        self.variable = variable
+        self.catchBlock = catchBlock
+
+class AstTryFinallyStatement(AstTryStatement):
+    def __init__(self, tryBlock, finallyBlock):
+        super(self.__class__, self).__init__(tryBlock)
+        self.finallyBlock = finallyBlock
 
 class AstCompareOperation(AstExpression):
     def __init__(self, left, right, op):

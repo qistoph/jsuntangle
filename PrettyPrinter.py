@@ -159,6 +159,20 @@ class PrettyPrinter(object):
         ret = self.indent("return %s;" % (self.toString(node.expression)))
         return ret
 
+    def printAstTryCatchStatement(self, node):
+        var = "%s" % node.variable.name
+        catchBlock = self.toString(node.catchBlock)
+        ret = self.indent("try {\n")
+        self.indention += 1
+        ret += self.toString(node.tryBlock) + "\n"
+        self.indention -= 1
+        ret += self.indent("} catch (%s) {\n" % node.variable.name)
+        self.indention += 1
+        ret += self.toString(node.catchBlock) + "\n"
+        self.indention -= 1
+        ret += self.indent("}")
+        return ret
+
     def printAstAssignment(self, node):
         ret = "%s %s %s" % (self.toString(node.target), self.toString(node.op), self.toString(node.value))
         return ret
