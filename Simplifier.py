@@ -297,7 +297,7 @@ class Simplifier(object):
             raise Exception("Joining arrays expected only with strings (got %s: %s)" % (type(joiner), pp.toString(joiner)))
 
         print "Simplifying array by joining"
-        result = joiner.join(str(x.value)[1:-1] for x in arr)
+        result = joiner.join(str(x.value) for x in arr)
         return AstLiteral('%s' % result)
 
     def displayValue(self, val):
