@@ -1,11 +1,34 @@
 import re
 import logging
+import copy
 import traceback
 from PrettyPrinter import PrettyPrinter
 from Parser import *
 
 log = logging.getLogger("Untangle");
 pp = PrettyPrinter()
+
+class JsValue(object):
+    value = None
+
+    def __init__(self, name, value = None):
+        self.name = name
+        self.setCount = 0
+        self.getCount = 0
+
+        self.value = value
+
+    def set_value(self, value):
+        print "JsValue.set_value(%s, %s)" % (self.name, value)
+        self.setCount += 1
+        self._value = value
+
+    def get_value(self):
+        print "JsValue.get_value(%s) - gets: %d, sets: %d" % (self.name, self.getCount, self.setCount)
+        self.getCount += 1
+        return self._value
+
+    value = property(get_value, set_value)
 
 class Simplifier(object):
     def __init__(self):
@@ -14,7 +37,9 @@ class Simplifier(object):
     def scopeSet(self, name, value):
         print "Setting in scope %s = %s" % (name, self.displayValue(value))
 
-        assert(value is not None)
+        #assert(value is not None)
+
+        targetScope = None
 
         n = len(self.scopes) - 1
         while n >= 0:
@@ -22,20 +47,28 @@ class Simplifier(object):
             for parm in scope.parameters:
                 #print "set scope param - %s" % (parm.name)
                 if parm.name == name:
-                    scope.values[name] = value
-                    return
+                    targetScope = scope
+                    break
             for decl in scope.declarations:
                 #print "set scope %d - %s" % (n, decl.proxy.name)
                 if decl.proxy.name == name:
                     #print "Found in scope %d" % n
-                    scope.values[name] = value
-                    return
+                    targetScope = scope
+                    break
             #print "Not found in scope %d" % n
             n -= 1
 
-        #print "Not found in any scope: %s" % name
-        log.warning("Not found in any scope, set: %s" % name)
-        self.scopes[0].values[name] = value
+        if targetScope is None:
+            #print "Not found in any scope: %s" % name
+            log.warning("Not found in any scope, set: %s" % name)
+            targetScope = self.scopes[0]
+
+        if name in targetScope.values:
+            targetScope.values[name].value = value
+        else:
+            targetScope.values[name] = JsValue(name, value)
+
+        return
 
     def scopeGet(self, name):
         print "Get from scope %s" % name
@@ -43,7 +76,7 @@ class Simplifier(object):
         while n >= 0:
             scope = self.scopes[n]
             if name in scope.values:
-                return scope.values[name]
+                return scope.values[name].value
 
             n -= 1
 
@@ -51,6 +84,7 @@ class Simplifier(object):
         return None
 
     def handle(self, ast):
+        #print "handle %s" % type(ast)
         if isinstance(ast, AstNode):
             handlerName = 'handle%s' % ast.__class__.__name__
             if hasattr(self, handlerName):
@@ -59,6 +93,7 @@ class Simplifier(object):
                 return ret
             else:
                 #log.debug("No handler %s" % handlerName)
+                ast = copy.copy(ast)
                 for n in dir(ast):
                     if n[0:2] == "__" and n[-2:] == "__":
                         # Skip built-in attributes (__...__)
@@ -84,6 +119,12 @@ class Simplifier(object):
             return AstLiteral(left.value + right.value)
         else:
             raise Exception("binopAddLiterals can't add %s and %s" % (type(left), type(right)))
+
+    def handleAstCountOperation(self, instr):
+        if type(instr.expression) is AstVariableProxy:
+            vp = instr.expression
+            self.scopeSet(vp.name, None) # Set None to indicate an unknown value
+        return instr
 
     def handleAstBinaryOperation(self, instr):
         print "handleAstBinaryOperation(%s, %s)" % (type(instr.left), type(instr.right))
@@ -262,6 +303,42 @@ class Simplifier(object):
             print "Call type: %s" % type(expr)
 
         return AstCall(expr, args)
+
+    def handleAstForStatement(self, ast):
+        # Force order in for-statement properties
+
+        #Parse once, to check if vars are updated
+        init = self.handle(ast.init)
+        variableSets = {}
+        for scope in self.scopes:
+            for name, var in scope.values.iteritems():
+                variableSets[var.name] = var.setCount
+
+        print "variableSets:"
+        for name, count in variableSets.iteritems():
+            print "%s: %d" % (name, count)
+
+        print "ast.condition: %s" % pp.toString(ast.condition)
+        self.handle(ast.condition)
+        print "ast.condition: %s" % pp.toString(ast.condition)
+        self.handle(ast.nextStmt)
+        self.handle(ast.body)
+
+        for scope in self.scopes:
+            for name, var in scope.values.iteritems():
+                if name in variableSets:
+                    old = variableSets[name]
+                    new = var.setCount
+                    print "%s - old: %d, new: %d" % (name, old, new)
+                    if new != old:
+                        self.scopeSet(name, None)
+
+        condition = self.handle(ast.condition)
+        nextStmt = self.handle(ast.nextStmt)
+        body = self.handle(ast.body)
+        ret = AstForStatement(init, condition, nextStmt, body)
+        #Second time, replacing only static vars
+        return ret
 
     def recursiveFind(self, ast, typ):
         ret = []

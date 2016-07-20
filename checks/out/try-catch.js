@@ -5,7 +5,7 @@ try {
   alert(ex);
 }
 var i;
-for(i = 0; (i < 10); (++0);) {
+for(i = 0; (i < 10); (++i);) {
   try {
     i += j;
   } catch (ex) {
