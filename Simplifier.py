@@ -103,7 +103,9 @@ class Simplifier(object):
         value = self.handle(ass.value)
         #TODO: set in scope instead of global
         #TODO: if op then simplify (e.g.: a=1;b=3;b^=a => a=1;b=3;b=2
-        self.globalSet(target.name, value)
+
+        if type(target) is AstVariableProxy:
+            self.globalSet(target.name, value)
         return AstAssignment(op, binop, target, value)
 
     def handleAstVariableDeclaration(self, decl):
