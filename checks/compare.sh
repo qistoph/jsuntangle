@@ -41,6 +41,26 @@ function yesno() {
 }
 
 for FILE in *.js; do
-	yesno "Continue with $FILE?" || break
-	vimdiff "out/$FILE" "temp/$FILE"
+	echo -n "$FILE "
+
+	set +o errexit
+	../untangle.py -c "$FILE" "temp/$FILE" >/dev/null 2>&1
+	EXIT=$?
+	set -o errexit
+
+	if [ $EXIT -eq 0 ]; then
+		set +o errexit
+		cmp -s "temp/$FILE" "out/$FILE"
+		EXIT=$?
+		set -o errexit
+		if [ $EXIT -ne 0 ]; then
+			vimdiff "out/$FILE" "temp/$FILE"
+			yesno "Continue?" || break
+		else
+			echo "No change"
+		fi
+	else
+		echo "FAILED"
+	fi
+
 done
