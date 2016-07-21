@@ -15,12 +15,13 @@ function control_c() {
 
 trap control_c SIGINT
 
+ret=0
 cd "$(dirname $0)"
 for FILE in *.js; do
 	echo -n "$FILE "
 
 	set +o errexit
-	../bin/jsuntangle -c "$FILE" "temp/$FILE" >/dev/null 2>&1
+	OUTPUT=$(../bin/jsuntangle -c "$FILE" "temp/$FILE" 2>&1)
 	EXIT=$?
 	set -o errexit
 
@@ -28,5 +29,10 @@ for FILE in *.js; do
 		cmp -s "temp/$FILE" "out/$FILE" && echo "OK" || echo "CHANGED"
 	else
 		echo "FAILED"
+		echo "$OUTPUT"
+		echo
+		ret=1
 	fi
 done
+
+exit $ret
