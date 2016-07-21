@@ -20,7 +20,7 @@ for FILE in *.js; do
 	echo -n "$FILE "
 
 	set +o errexit
-	../jsuntangle/jsuntangle.py -c "$FILE" "temp/$FILE" >/dev/null 2>&1
+	../bin/jsuntangle -c "$FILE" "temp/$FILE" >/dev/null 2>&1
 	EXIT=$?
 	set -o errexit
 

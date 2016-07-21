@@ -2,10 +2,7 @@
 import sys
 import getopt
 import logging
-from CCInterpreter import CCInterpreter
-from Parser import AST
-from PrettyPrinter import PrettyPrinter
-from Simplifier import Simplifier
+import jsuntangler
 
 log = logging.getLogger("Untangle")
 #fh = logging.FileHandler('test.log')
@@ -55,10 +52,9 @@ def main(argv):
     f_in.close()
 
     if options['fixcc']:
-        cci = CCInterpreter()
-        scriptText = cci.run(scriptText)
+        scriptText = jsuntangler.fixCc(scriptText)
 
-    parser = AST(scriptText)
+    parser = jsuntangler.parse(scriptText)
     print "done AST"
     if options['ast'] != False:
         print "Writing AST to %s" % options['ast']
@@ -68,14 +64,12 @@ def main(argv):
 
     program = parser.program
 
-    printer = PrettyPrinter()
     print "Before simplifying"
-    print printer.toString(program.body)
+    print jsuntangler.toString(program.body)
 
-    sfier = Simplifier()
-    simpler = sfier.handle(program)
+    simpler = jsuntangler.simplify(program)
     print "After simplifying"
-    script = printer.toString(simpler.body)
+    script = jsuntangler.toString(simpler.body)
     print >>f_out, script
     if f_out != sys.stdout:
         f_out.close()
