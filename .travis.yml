@@ -1,13 +1,13 @@
 language: python
 python:
-    - "2.6"
     - "2.7"
-    - "3.2"
-    - "3.3"
-    - "3.4"
-    - "3.5"
-    - "3.5-dev"
+before_install:
+    - sudo apt-get install python-dev libboost-dev libboost-python-dev libboost-thread-dev libboost-system-dev
+    - git clone --depth=50 --branch=master https://github.com/qistoph/pyv8.git qistoph/pyv8
+    - cd qistoph/pyv8
+    - python setup.py build
+    - sudo python setup.py install
 # command to install dependencies
-# install: "pip install -r requirements.txt"
+install: "pip install -r requirements.txt"
 # command to run tests
 script: ./checks/run.sh
