@@ -1,19 +1,19 @@
 language: python
 python:
-    - "2.7"
+- "2.7"
 cache:
     directories:
-        - cache
+    - cache
 before_install:
-    - sudo apt-get install python-dev libboost-dev libboost-python-dev libboost-thread-dev libboost-system-dev
-    - git clone --depth=50 --branch=master https://github.com/qistoph/pyv8.git pyv8
-    - [ -d cache ] || mkdir cache
-    - cp -r cache/* pyv8/
-    - pushd pyv8
-    - python setup.py build
-    - sudo python setup.py install
-    - popd
-    - cp -r pyv8/build/ pyv8/dist/ cache/
+- sudo apt-get install python-dev libboost-dev libboost-python-dev libboost-thread-dev libboost-system-dev
+- git clone --depth=50 --branch=master https://github.com/qistoph/pyv8.git pyv8
+- mkdir -p cache
+- cp -r cache/* pyv8/
+- pushd pyv8
+- python setup.py build
+- sudo python setup.py install
+- popd
+- cp -r pyv8/build/ pyv8/dist/ cache/
 # command to install dependencies
 install: "sudo pip install -r requirements.txt"
 # command to run tests
