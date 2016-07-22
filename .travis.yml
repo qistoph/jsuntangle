@@ -8,7 +8,7 @@ before_install:
 - sudo apt-get install python-dev libboost-dev libboost-python-dev libboost-thread-dev libboost-system-dev
 - git clone --depth=50 --branch=master https://github.com/qistoph/pyv8.git pyv8
 - mkdir -p cache
-- cp -r cache/* pyv8/
+- rsync -avzh --ignore-errors cache/ pyv8/
 - pushd pyv8
 - python setup.py build
 - sudo python setup.py install
