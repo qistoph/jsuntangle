@@ -11,6 +11,18 @@ Untangle obfuscated javascript, e.g:
 - `arr=[2,4,6,8]; val=arr[2];` :arrow_right: `arr=[2,4,6,8]; val=4;`
 - ...
 
+Requirements
+------------
+Tested with Debian 8 (jessie) and python 2.7
+
+**PIP**
+- `apt-get install python-pip`
+- `pip install -r requirements.txt`
+
+
+**PyV8**
+- https://github.com/qistoph/pyv8
+
 Get & Run
 ---------
 ```
