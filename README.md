@@ -39,3 +39,24 @@ cd jsuntangle
 sudo python setup.py install
 jsuntangle
 ```
+Development tips
+----------------
+Run tests:
+```
+./checks/run.sh
+```
+
+Check differences:
+```
+./checks/compare.sh
+```
+
+Check Travis-CS config:
+```
+travis lint .travis.yml
+```
+
+Preview README.md
+```
+grip README.md 0.0.0.0
+```
