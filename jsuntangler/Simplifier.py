@@ -393,7 +393,14 @@ class Simplifier(object):
     def handleWindowEval(self, eval_arg):
         subScript = eval_arg.value
         subScript = re.sub(r'\\"', '"', subScript)
+        subScript = re.sub(r'\\n', '\n', subScript)
+        subScript = re.sub(r'\\r', '\r', subScript)
+        subScript = re.sub(r'\\t', '\t', subScript)
         #TODO: unescape?
+
+        #f = open('eval.txt', 'w')
+        #print >>f, subScript
+        #f.close()
 
         print "Handling subscript (for eval): %s" % (self.displayValue(subScript))
         subScriptAst = AST(subScript)
