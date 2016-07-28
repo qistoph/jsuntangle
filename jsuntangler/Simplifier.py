@@ -175,6 +175,8 @@ class Simplifier(object):
 
         if type(target) is AstVariableProxy:
             self.scopeSet(target.name, value)
+        if type(target) is AstProperty:
+            target = self.handle(target) # Simplify property, e.g. a="Char"; b="set"; c[a + b]="437" => c["Charset"]="437"
         ret = AstAssignment(op, binop, target, value)
         print "Returning AstAssignment: %s" % (self.displayValue(ret))
         return ret
