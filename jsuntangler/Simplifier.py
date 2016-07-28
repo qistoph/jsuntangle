@@ -298,7 +298,8 @@ class Simplifier(object):
                             return args[i]
 
             # Function not simplified. Keeping the function call instead of literal is more readable
-            return call
+            ret = AstCall(call.expression, args)
+            return ret
         else:
             print "Call type: %s" % type(expr)
 
