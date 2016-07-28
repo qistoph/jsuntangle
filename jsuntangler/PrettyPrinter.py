@@ -238,6 +238,14 @@ class PrettyPrinter(object):
         ret += self.indent("} while(%s);\n" % self.toString(node.condition))
         return ret
 
+    def printAstForEachStatement(self, node):
+        ret = self.indent("for(var %s in %s) {\n" % (node.each.name, self.toString(node.subject)))
+        self.indention+=1
+        ret += self.toString(node.body) + "\n"
+        self.indention-=1
+        ret += self.indent("}")
+        return ret
+
     def printAstEmptyStatement(self, node):
         return self.indent(";")
 

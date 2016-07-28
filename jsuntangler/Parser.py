@@ -185,8 +185,20 @@ class AST(object):
         ret = AstDoWhileStatement(condition, body)
         return ret
 
+    def handleAstForEachStatement(self, stmt):
+        body = self.handle(stmt.body)
+        subject = self.handle(stmt.subject)
+        each = self.handle(stmt.each)
+        ret = AstForEachStatement(each, subject, body)
+        return ret
+
     def handleAstForInStatement(self, stmt):
-        raise Exception('TODO')
+        body = self.handle(stmt.body)
+        subject = self.handle(stmt.subject)
+        each = self.handle(stmt.each)
+        enumerable = self.handle(stmt.enumerable)
+        ret = AstForEachStatement(each, subject, body)
+        return ret
 
     def handleAstCall(self, call):
         expr = self.handle(call.expression)
@@ -460,6 +472,11 @@ class AstForEachStatement(AstIterationStatement):
         super(self.__class__, self).__init__(body)
         self.each = each
         self.subject = subject
+
+class AstForInStatement(AstForEachStatement):
+    def __init__(self, each, subject, body, enumerable):
+        super(self.__class__, self).__init__(each, subject, body)
+        self.enumerable = enumerable
 
 class AstBlock(AstNode):
     def __init__(self, statements):
