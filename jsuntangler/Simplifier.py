@@ -136,7 +136,7 @@ class Simplifier(object):
                 # "a" + "b" // replace by "ab"
                 # 1 + 2 + 3 // replace by 6
                 ret = self.binopAddLiterals(left, right)
-                print "Simplified to: %s" % ret.value
+                print "Simplified to: %s" % self.displayValue(ret.value)
                 return ret
             elif type(left) is AstBinaryOperation \
                     and type(left.right) is AstLiteral \
