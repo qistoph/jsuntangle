@@ -265,25 +265,30 @@ class AST(object):
         elif litr.isNull:
             val = None
         elif litr.isString:
-            if val[0] != '"' or val[-1] != '"':
-                raise Exception('Literal string expected to start and end with "')
-            ret = ''
-            for c in val[1:-1]:
-                if c == "\n":
-                    ret += "\\n"
-                elif c == "\r":
-                    ret += "\\r"
-                elif c == "\t":
-                    ret += "\\t"
-                elif c == "\"":
-                    ret += "\\\""
-                elif c == "\\":
-                    ret += "\\\\"
-                elif ord(c) < 32 or 0x80 <= ord(c) <= 0xff:
-                    ret += "\\x%02x" % ord(c)
-                else:
-                    ret += c
-            val = ret
+            if len(val) == 0:
+                ret = ''
+            elif len(val) >= 2:
+                if val[0] != '"' or val[-1] != '"':
+                    raise Exception('Literal string expected to start and end with "')
+                ret = ''
+                for c in val[1:-1]:
+                    if c == "\n":
+                        ret += "\\n"
+                    elif c == "\r":
+                        ret += "\\r"
+                    elif c == "\t":
+                        ret += "\\t"
+                    elif c == "\"":
+                        ret += "\\\""
+                    elif c == "\\":
+                        ret += "\\\\"
+                    elif ord(c) < 32 or 0x80 <= ord(c) <= 0xff:
+                        ret += "\\x%02x" % ord(c)
+                    else:
+                        ret += c
+                val = ret
+            else:
+                raise Exception('Literal string expected to start and end with ". Length: %d. toString: %s' % (len(val), str(val)))
 
         #TODO: check to see if we can get asPropertyName
         #print "AstLiteral: %s" % litr.asPropertyName
